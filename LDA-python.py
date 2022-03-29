@@ -2,11 +2,9 @@
 """
 Created on Wed Mar  9 14:15:46 2022
 
-@author: wlgcc
+@author: So
 """
 
-from pdfminer.high_level import extract_text
-import glob
 import pandas as pd
 from nltk.corpus import wordnet
 import string
@@ -23,18 +21,6 @@ import os
 import seaborn as sns
 from gensim.models.coherencemodel import CoherenceModel
 import numpy as np
-
-file_before = glob.glob(r"C:\Users\wlgcc\Downloads\BMdata_PDF\Before2011\NoCluster\*.pdf")
-file_after = glob.glob(r"C:\Users\wlgcc\Downloads\BMdata_PDF\After2011\NoCluster\*.pdf")
-
-text_before = [extract_text(i) for i in file_before]
-text_after = [extract_text(i) for i in file_after]
-
-pattern = r"C:\\Users\\wlgcc\\Downloads\\BMdata_PDF\\[A-Za-z]+2011\\NoCluster\\"
-namelst_B = [re.sub(pattern,"", i) for i in file_before]
-namelst_A = [re.sub(pattern,"", i) for i in file_after]
-namelst_B = [re.sub(".pdf","", i) for i in namelst_B]
-namelst_A = [re.sub(".pdf","", i) for i in namelst_A]
 
 #creat functions
 def get_wordnet_pos(pos_tag):
@@ -208,9 +194,8 @@ CoFig_A = sns.lineplot(data=CoDF_A, x='N_of_Topic', y='Coherence')
 PerFig_B = sns.lineplot(data=PerDF_B, x='N_of_Topic', y='Perplexity')
 PerFig_A = sns.lineplot(data=PerDF_A, x='N_of_Topic', y='Perplexity')
 
-os.chdir(r"C:\Users\wlgcc\Downloads\BMdata_PDF")
+os.chdir(r"")
 
-CP_B = pd.merge(CoDF_B, PerDF_B, on="N_of_Topic")
 CP_A = pd.merge(CoDF_A, PerDF_A, on="N_of_Topic")
 
 #Normalization By MAX-MIN
@@ -219,17 +204,13 @@ def min_max(l):
     l_max = max(l)
     return [(i - l_min) / (l_max - l_min) for i in l]
 
-CP_B["Normal_Coh"] = min_max(CP_B["Coherence"])
-CP_B["Normal_Per"] = min_max(CP_B["Perplexity"])
 CP_A["Normal_Coh"] = min_max(CP_A["Coherence"])
 CP_A["Normal_Per"] = min_max(CP_A["Perplexity"])
 
-CP_B.to_excel("CP_B.xlsx")
 CP_A.to_excel("CP_A.xlsx")
 
 #LDA comit
 
-BM_B = LDA(cleaned_before, "BM_before2011", 8)
 BM_A = LDA(cleaned_after, "BM_after2011", 6)
 
 def gen_dfwords(lda, ntopics):
@@ -257,23 +238,12 @@ def gen_dfByLDA(lda, tcorpus, ntopics):
     
     return [topics, clusters]
     
-
-
-    
-df_B = pd.DataFrame()
 df_A = pd.DataFrame()
 
-df_B["Article"] = namelst_B
 df_A["Article"] = namelst_A
 
-TC_B = gen_dfByLDA(BM_B[0], BM_B[1], 8)
 TC_A = gen_dfByLDA(BM_A[0], BM_A[1], 6)
-
-
-df_B["Topics"] = TC_B[1]
 df_A["Topics"] = TC_A[1]
-
-df_B.to_excel("Topics_B.xlsx")
 df_A.to_excel("Topics_A.xlsx")
 
 
